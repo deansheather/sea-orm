@@ -65,6 +65,9 @@ pub enum ColumnType {
     Uuid,
     /// `ENUM` data type with name and variants
     Enum(String, Vec<String>),
+    /// `ARRAY` data type with a single inner type.
+    #[cfg(feature = "postgres-array")]
+    Array(Option<String>),
 }
 
 macro_rules! bind_oper {
@@ -380,6 +383,8 @@ impl From<ColumnType> for sea_query::ColumnType {
             }
             ColumnType::Uuid => sea_query::ColumnType::Uuid,
             ColumnType::Enum(name, variants) => sea_query::ColumnType::Enum(name, variants),
+            #[cfg(feature = "postgres-array")]
+            ColumnType::Array(inner) => sea_query::ColumnType::Array(inner),
         }
     }
 }
@@ -411,6 +416,8 @@ impl From<sea_query::ColumnType> for ColumnType {
             sea_query::ColumnType::Custom(s) => Self::Custom(s.to_string()),
             sea_query::ColumnType::Uuid => Self::Uuid,
             sea_query::ColumnType::Enum(name, variants) => Self::Enum(name, variants),
+            #[cfg(feature = "postgres-array")]
+            sea_query::ColumnType::Array(inner) => Self::Array(inner),
             _ => unimplemented!(),
         }
     }
